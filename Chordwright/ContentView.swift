@@ -133,18 +133,26 @@ struct ContentView: View {
                 .buttonStyle(.plain)
             }
             Spacer()
-            if let name = midiManager.connectedSourceNames.first {
-                HStack(spacing: 4) {
-                    Image(systemName: "pianokeys")
-                    Text(name)
-                        .lineLimit(1)
-                }
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Capsule().fill(Color.chordwrightPanel))
-                .foregroundStyle(Color.chordwrightInk)
+            // Always visible, not just when a source is connected — Apple
+            // App Review rejected the 1.0 submission under Guideline 2.3
+            // because they couldn't locate the MIDI feature described in
+            // the app's metadata: with no MIDI hardware on hand, and this
+            // pill previously only appearing once something was already
+            // connected, there was nothing in the UI to confirm MIDI
+            // support even exists. Now it always shows a status — "MIDI
+            // Ready" (dim) when idle, the device name (filled) once
+            // something connects — so the feature is visibly present from
+            // a cold launch with zero external hardware required.
+            HStack(spacing: 4) {
+                Image(systemName: "pianokeys")
+                Text(midiManager.connectedSourceNames.first ?? "MIDI Ready")
+                    .lineLimit(1)
             }
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(midiManager.connectedSourceNames.isEmpty ? Color.chordwrightPanel.opacity(0.5) : Color.chordwrightPanel))
+            .foregroundStyle(midiManager.connectedSourceNames.isEmpty ? Color.chordwrightInk.opacity(0.4) : Color.chordwrightInk)
             Button {
                 showingHelp = true
             } label: {
